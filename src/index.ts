@@ -182,10 +182,9 @@ export class BevyrlyIndex {
                 case '$': map = this.mut_res; break;
                 case '+': map = this.with; break;
                 case '-': map = this.without; break;
-                default: map = this.direct; ident = part; break;
+                default: map = this.any; ident = part; break;
             }
 
-            console.log(map.keys());
             let layer = Array.from(map.keys())
                 .filter(key => key.includes(ident))
                 .flatMap(key => Array.from(map.get(key) ?? []));
@@ -206,21 +205,33 @@ export class BevyrlyIndex {
         }
 
         if (obj instanceof TypeCall) {
+            let name = obj.typeCallee.name;
+            if (!new Set(["With", "Without", "Res", "ResMut", "Option", "Query", "Local", "NonSendMut"]).has(name)) {
+                this[item](system_name, name);
+            }
             for (const sub of obj.typeArguments.values()) {
                 if (sub instanceof Identifier) {
                     if (generics.has(sub.name)) continue;
                     this[item](system_name, sub.name);
+                } else if (sub instanceof TypeCall) {
+                    let typeJson = sub.typeCallee.toJSON();
+                    let name = typeJson["name"];
+                    let innerType = sub.typeArguments[0];
+                    if (!this.recursiveTypeCall(generics, innerType, typeJson, name, system_name)) {
+                        //console.log("REC failed: ", sub);
+                    }
                 }
             }
+        } else if (obj instanceof Identifier) {
+            this[item](system_name, obj.name);
         }
     }
 
-    recursiveTypeCall(generics: Set<string>, par: any, typeJson: string, name: string, system_name: string) {
+    recursiveTypeCall(generics: Set<string>, par: any, typeJson: string, name: string, system_name: string): boolean {
         if (name == "Query" || name == "Local") {
             for (const arg of par.typeArguments.values()) {
                 if (arg instanceof Identifier) {
                     this.addDirect(system_name, arg.name);
-                    console.log("Direct: ", system_name, arg.name);
                 } else if (arg instanceof TypeTuple) {
                     for (const sub of arg.items.values()) {
                         if (sub instanceof TypeReference) {
@@ -234,7 +245,13 @@ export class BevyrlyIndex {
                             }
                         } else if (sub instanceof Identifier) {
                             this.addDirect(system_name, sub.name);
-                            console.log("Direct: ", system_name, sub.name);
+                        } else if (sub instanceof TypeCall) {
+                            let typeJson = sub.typeCallee.toJSON();
+                            let name = typeJson["name"];
+                            let innerType = sub.typeArguments[0];
+                            if (!this.recursiveTypeCall(generics, innerType, typeJson, name, system_name)) {
+                                //console.log("REC failed: ", sub);
+                            }
                         }
                     }
                 } else if (arg instanceof TypeReference) {
@@ -254,6 +271,8 @@ export class BevyrlyIndex {
                             if (sub instanceof Identifier) {
                                 if (generics.has(sub.name)) continue;
                                 this.addWith(system_name, sub.name);
+                            } else {
+                                console.log("WITH", sub);
                             }
                         }
                     } else if (name == "Without") {
@@ -261,6 +280,8 @@ export class BevyrlyIndex {
                             if (sub instanceof Identifier) {
                                 if (generics.has(sub.name)) continue;
                                 this.addWithout(system_name, sub.name);
+                            } else {
+                                console.log("WITHOUT", sub);
                             }
                         }
                     }
@@ -268,21 +289,36 @@ export class BevyrlyIndex {
                     console.log("[ERR] Unknown argument type: ", arg);
                 }
             }
+            return true;
         } else if (name == "Res") {
             this.addItem(generics, "addRes", par, system_name);
+            return true;
         } else if (name == "ResMut" || name == "NonSendMut") {
             this.addItem(generics, "addMutRes", par, system_name);
+            return true;
         } else if (name == "EventReader") {
             this.addItem(generics, "addEventReader", par, system_name);
+            return true;
         } else if (name == "EventWriter") {
             this.addItem(generics, "addEventWriter", par, system_name);
+            return true;
+        } else if (name == "With") {
+            this.addItem(generics, "addWith", par, system_name);
+            return true;
+        } else if (name == "Without") {
+            this.addItem(generics, "addWithout", par, system_name);
+            return true;
         } else if (name == "Option") {
             let typeJson = par.typeArguments[0].typeCallee.toJSON();
             let name = typeJson["name"];
             let innerType = par.typeArguments[0];
-            this.recursiveTypeCall(generics, innerType, typeJson, name, system_name);
-        } else {
-            console.log("[ERR] Unknown type: ", name);
+            if (!this.recursiveTypeCall(generics, innerType, typeJson, name, system_name)) {
+                //console.log("REC failed: ", par);
+            }
+            return true;
+        } else { // this is just a direct generic
+            this.addItem(generics, "addDirect", par, system_name);
+            return false;
         }
     }
 
@@ -307,11 +343,14 @@ export class BevyrlyIndex {
                             let typeJson = par.typeAnnotation.typeCallee.toJSON();
                             let name = typeJson["name"];
 
-                            this.recursiveTypeCall(generics, par.typeAnnotation, typeJson, name, system_name);
+                            if (!this.recursiveTypeCall(generics, par.typeAnnotation, typeJson, name, system_name)) {
+                                //console.log("Recursion failed with ", par);
+                            }
                         } else if (par.typeAnnotation instanceof Identifier) {
                             this.addDirect(system_name, par.typeAnnotation.name);
-                            console.log("Direct: ", system_name, par.typeAnnotation.name);
                         }
+                    } else {
+                        console.log("Not taking ", par);
                     }
                 }
             }

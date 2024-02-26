@@ -167,8 +167,12 @@ export class BevyrlyIndex {
         }
     }
 
-    get(s: string): string[] {
+    get(s: string): [string[], "short" | "long"] {
         let all_systems = Array.from(this.systems.keys());
+        let long_print = s.startsWith(":");
+        if (long_print) {
+            s = s.slice(1).trim();
+        }
 
         for (const part of s.split(" ")) {
             let ident = part.slice(1);
@@ -186,14 +190,14 @@ export class BevyrlyIndex {
             }
 
             let layer = Array.from(map.keys())
-                .filter(key => key.includes(ident))
+                .filter(key => (key === undefined) ? false : key.includes(ident))
                 .flatMap(key => Array.from(map.get(key) ?? []));
 
             all_systems = intersect_safe(all_systems, layer);
-            if (all_systems.length == 0) return all_systems;
+            if (all_systems.length == 0) return [all_systems, "short"];
         }
 
-        return all_systems;
+        return [all_systems, long_print ? "long" : "short"];
     }
 
     addItem(generics: Set<string>, item: Adders, par: any, system_name: string) {

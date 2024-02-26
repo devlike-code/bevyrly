@@ -1,71 +1,47 @@
-# bevyrly README
+# Bevyrly 
 
-This is the README for your extension "bevyrly". After writing up a brief description, we recommend including the following sections.
+**Bevy** is **rly** useful, but requires some hygiene! Pronounced as /ˈbɛvə(ɹ)li/, derives from Old English, combining *befer* ("beaver") and *leah* (\"clearing\").
+
+This tool allows you to open one or more notebooks in Visual Studio and go hog wild exploring your systems. Instead of tracing them through files, find them via their arguments and then save that as a compilable notebook that will auto-update.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+To start using Bevyrly (just like Beverly), install this extension, and then open the palette (Ctrl+Shift+P) and type `Bevyrly: New Notebook`. Once inside, write `?` and run it to get full docs, just like what you have below.
 
-For example if there is an image subfolder under your extension project workspace:
+### Search control
+- `&Transform`: find all systems that include `Query<&Transform>` within it
+- `*Transform`: find all systems that include `Query<&mut Transform>` within it
+- `#Config`: find all systems that include `Res<Config>` within it
+- `$Config`: find all systems that include `ResMut<Config>` or `NonSendMut<Config>` within it
+- `<ShipFireEvent`: find all systems that include `EventReader<ShipFireEvent>` within it
+- `>ShipFireEvent`: find all systems that include `EventWriter<ShipFireEvent>` within it
+- `+Tag`: find all systems that include `With<Tag>` within it
+- `-Tag`: find all systems that include `Without<Tag>` within it
+- `JustText`: will match any of the above (might yield a *lot* of content)
 
-\!\[feature X\]\(images/feature-x.png\)
+### Output control
+- `?`: prints this documentation
+- `my prompt goes here`: find and print locations of all systems that mention 'my', 'prompt', 'goes', and 'here'
+- `:my prompt goes here`: find and print declaration for all systems that mention 'my', 'prompt', 'goes', and 'here'
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### Examples
+- `:&Transform >ShipFireEvent +Player`: prints full function declarations for any system that queries the `Transform` component immutably, accesses `EventWriter<ShipFireEvent>`, and has a `With<Player>`.
+- `+Player -Player`: prints linkable locations to all the systems that require `With<Player>` and `Without<Player>` (possibly in different arguments)
+- `Foo Bar`: prints locations of all the systems that have the strings `Foo` and `Bar` <i>anywhere</i> in their arguments (including resources, components, etc.)
 
-## Requirements
+## How Does It Work
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Bevyrly analyzes your code whenever you open a new notebook. It takes the arguments of the systems you use and makes a catalog of the different kinds of resources, components, etc. mapped onto the systems they are used in. When you query Bevyrly, it parses your prompt and intersects the different mappings to get you exactly what you want. _There is no AI used in Bevyrly, and never will be._
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- We don't distinguish things within the same _argument_ of a system, so for example, you can't say `A, B` to mean "give me a system that has one argument with both `A` and `B`.
+- Sometimes, the highlighting fails without obvious reason.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+Initial release of Bevyrly, a weekend project that I'll need going into a large project
 
 **Enjoy!**

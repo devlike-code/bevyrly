@@ -17,7 +17,7 @@ function createVirtualTextProvider(bevyrlyIndex: BevyrlyIndex): vscode.TextDocum
         provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
             let search = uri.path.slice(1);
             let content = "";
-            for (const system of bevyrlyIndex.get(search)) {
+            for (const system of bevyrlyIndex.get(search)[0]) {
                 content += expandSystemFromName(bevyrlyIndex, system);
             }
 

@@ -362,25 +362,30 @@ export class BevyrlyIndex {
     }
 }
 
-export function startBevyrlyIndexing(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex) {
+export function startBevyrlyIndexing(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex, bevyrlyLog: string) {
     bevyrlyIndex.clear();
-
+    bevyrlyLog += "Clearing bevyrly...<br />";
     if (vscode.workspace.workspaceFolders) {
         // commands
+        bevyrlyLog += "Found workspace...<br />";
         for (const folder of vscode.workspace.workspaceFolders) {
             let path = Uri.joinPath(folder.uri, "src");
+            bevyrlyLog += "Reading dir " + path + "...<br />";
             vscode.workspace.fs.readDirectory(path).then(async (r: [string, vscode.FileType][]) => {
                 for (const file of r.values()) {
                     if (file[0].endsWith(".rs")) {
                         const filepath = Uri.joinPath(path, file[0]);
+                        bevyrlyLog += "  Found file " + filepath + ".<br />";
                         await vscode.workspace.openTextDocument(filepath).then((f: vscode.TextDocument) => {
                             let ast = rs.parseFile(f.getText(), { filepath: filepath.toString() }).program.ast;
                             for (const node of ast.values()) {
                                 if (node.nodeType == 38) {
+                                    bevyrlyLog += "    Adding function " + node.toJSON() + ".<br />";
                                     bevyrlyIndex.addFunctionNode(node);
                                 } else if (node.nodeType == 54) {
                                     for (const sub of node.body.values()) {
                                         if (sub.nodeType == 38) {
+                                            bevyrlyLog += "    Adding function " + sub.toJSON() + ".<br />";
                                             bevyrlyIndex.addFunctionNode(sub);
                                         }
                                     }
@@ -392,6 +397,8 @@ export function startBevyrlyIndexing(context: vscode.ExtensionContext, bevyrlyIn
             }).then(_ => {
                 bevyrlyIndex.isInitialized = true;
                 console.log(bevyrlyIndex);
+                bevyrlyLog += "Bevyrly reinitialized.<br />";
+                bevyrlyLog += JSON.stringify(bevyrlyIndex);
             });
         }
     }

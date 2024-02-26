@@ -3,8 +3,8 @@
   "displayName": "Bevyrly",
   "icon": "icon.png",
   "publisher": "DEVLIKE",
-  "description": "It's pronounced beverly. A bevy-oriented coding context editor",
-  "version": "0.0.3",
+  "description": "A bevy-oriented coding context editor for easier system search. Pronounced as beverly.",
+  "version": "0.0.5",
   "repository": {
     "url": "https://github.com/devlike-code/bevyrly"
   },

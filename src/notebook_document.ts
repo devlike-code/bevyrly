@@ -21,10 +21,10 @@ class BevyrlyController implements vscode.Disposable {
     private readonly _controller: vscode.NotebookController;
     private _executionOrder = 0;
 
-    constructor(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex) {
+    constructor(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex, bevyrlyLog: string) {
         this._bevyrlyIndex = bevyrlyIndex;
         if (!this._bevyrlyIndex.isInitialized) {
-            startBevyrlyIndexing(context, bevyrlyIndex);
+            startBevyrlyIndexing(context, bevyrlyIndex, bevyrlyLog);
         }
 
         this._controller = vscode.notebooks.createNotebookController(
@@ -57,10 +57,8 @@ class BevyrlyController implements vscode.Disposable {
 
         let query = cell.document.getText();
 
-        console.log("QUERY", query);
-        if (query == "count") {
-            console.log("!!!!!");
-            let output = "<code>" + this._bevyrlyIndex.any + "</code> resources registered.";
+        if (query == "~") {
+            let output = "<code>" + Array.from(this._bevyrlyIndex.any.keys()).length + "</code> resources registered.";
             let result = new vscode.NotebookCellOutput([vscode.NotebookCellOutputItem.text(output, "text/html")]);
             execution.replaceOutput(result, cell);
             execution.end(true, Date.now());
@@ -183,11 +181,11 @@ class BevyrlyNotebookSerializer implements vscode.NotebookSerializer {
     }
 }
 
-export function registerNotebookDocument(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex) {
+export function registerNotebookDocument(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex, bevyrlyLog: string) {
     context.subscriptions.push(
         vscode.workspace.registerNotebookSerializer('bevyrly-notebook', new BevyrlyNotebookSerializer())
     );
-    context.subscriptions.push(new BevyrlyController(context, bevyrlyIndex));
+    context.subscriptions.push(new BevyrlyController(context, bevyrlyIndex, bevyrlyLog));
 
     let disposableNewQuery = vscode.commands.registerCommand('bevyrly.newNotebook', async () => {
         var setting: vscode.Uri = vscode.Uri.parse("untitled:untitled.bevyrly");

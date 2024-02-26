@@ -42,7 +42,7 @@ Bevyrly analyzes your code whenever you open a new notebook. It takes the argume
 
 ## Release Notes
 
-### 0.0.3
+### 0.0.4
 
 Initial release of Bevyrly, a weekend project that I'll need going into a large project
 

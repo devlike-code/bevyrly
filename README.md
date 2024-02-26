@@ -1,5 +1,7 @@
 # Bevyrly 
 
+![bevyrly3](https://github.com/devlike-code/bevyrly/assets/2606844/ad44396b-ebb0-4a0c-bd74-7e72adc0cbf7)
+
 **Bevy** is **rly** useful, but requires some hygiene! Pronounced as /ˈbɛvə(ɹ)li/, derives from Old English, combining *befer* ("beaver") and *leah* (\"clearing\").
 
 This tool allows you to open one or more notebooks in Visual Studio and go hog wild exploring your systems. Instead of tracing them through files, find them via their arguments and then save that as a compilable notebook that will auto-update.

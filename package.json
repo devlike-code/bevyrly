@@ -4,7 +4,7 @@
   "icon": "icon.png",
   "publisher": "DEVLIKE",
   "description": "It's pronounced beverly. A bevy-oriented coding context editor",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "url": "https://github.com/devlike-code/bevyrly"
   },

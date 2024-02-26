@@ -57,7 +57,15 @@ class BevyrlyController implements vscode.Disposable {
 
         let query = cell.document.getText();
 
-        if (query.trim().toLowerCase() == "?") {
+        console.log("QUERY", query);
+        if (query == "count") {
+            console.log("!!!!!");
+            let output = "<code>" + this._bevyrlyIndex.any + "</code> resources registered.";
+            let result = new vscode.NotebookCellOutput([vscode.NotebookCellOutputItem.text(output, "text/html")]);
+            execution.replaceOutput(result, cell);
+            execution.end(true, Date.now());
+            return;
+        } else if (query.trim() == "?") {
             let output = [
                 "<h1>Bevyrly</h1><hr />",
                 "<b>Bevy</b> is <b>rly</b> useful, but requires some hygiene! Pronounced as /ˈbɛvə(ɹ)li/, derives from Old English, combining <i>befer</i> (\"beaver\") and <i>leah</i> (\"clearing\").<br />",

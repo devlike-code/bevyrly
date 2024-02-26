@@ -362,37 +362,60 @@ export class BevyrlyIndex {
     }
 }
 
-export function startBevyrlyIndexing(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex, bevyrlyLog: string) {
+export let bevyrlyLog: string = "";
+
+async function recursiveReadDirectory(path: Uri): Promise<Uri[]> {
+    let result = [];
+    let dir = await vscode.workspace.fs.readDirectory(path);
+    for (let [sub, type] of dir) {
+        if (type == vscode.FileType.Directory) {
+            bevyrlyLog += "Accessing dir " + sub + "<br>";
+            for (let add of await recursiveReadDirectory(Uri.joinPath(path, sub))) {
+                result.push(add);
+            }
+        } else {
+            let address = Uri.joinPath(path, sub);
+            if (sub.endsWith(".rs")) {
+                bevyrlyLog += "Adding file " + address + "<br>";
+                result.push(address);
+            }
+        }
+    }
+
+    return result;
+}
+
+export async function startBevyrlyIndexing(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex) {
+    const config = vscode.workspace.getConfiguration('bevyrly');
+    const src = config.get<string>('sourceFolder') ?? "src";
+
     bevyrlyIndex.clear();
     bevyrlyLog += "Clearing bevyrly...<br />";
     if (vscode.workspace.workspaceFolders) {
         // commands
         bevyrlyLog += "Found workspace...<br />";
         for (const folder of vscode.workspace.workspaceFolders) {
-            let path = Uri.joinPath(folder.uri, "src");
+            let path = Uri.joinPath(folder.uri, src);
             bevyrlyLog += "Reading dir " + path + "...<br />";
-            vscode.workspace.fs.readDirectory(path).then(async (r: [string, vscode.FileType][]) => {
-                for (const file of r.values()) {
-                    if (file[0].endsWith(".rs")) {
-                        const filepath = Uri.joinPath(path, file[0]);
-                        bevyrlyLog += "  Found file " + filepath + ".<br />";
-                        await vscode.workspace.openTextDocument(filepath).then((f: vscode.TextDocument) => {
-                            let ast = rs.parseFile(f.getText(), { filepath: filepath.toString() }).program.ast;
-                            for (const node of ast.values()) {
-                                if (node.nodeType == 38) {
-                                    bevyrlyLog += "    Adding function " + node.toJSON() + ".<br />";
-                                    bevyrlyIndex.addFunctionNode(node);
-                                } else if (node.nodeType == 54) {
-                                    for (const sub of node.body.values()) {
-                                        if (sub.nodeType == 38) {
-                                            bevyrlyLog += "    Adding function " + sub.toJSON() + ".<br />";
-                                            bevyrlyIndex.addFunctionNode(sub);
-                                        }
+            recursiveReadDirectory(path).then(async (r: Uri[]) => {
+                for (const file of r) {
+                    bevyrlyLog += "  Found file " + file + ".<br />";
+                    await vscode.workspace.openTextDocument(file).then((f: vscode.TextDocument) => {
+                        let ast = rs.parseFile(f.getText(), { filepath: file.toString() }).program.ast;
+                        for (const node of ast.values()) {
+                            if (node.nodeType == 38) {
+                                bevyrlyLog += "    Adding function " + JSON.stringify(node.toJSON()) + ".<br />";
+                                bevyrlyIndex.addFunctionNode(node);
+                            } else if (node.nodeType == 54) {
+                                for (const sub of node.body.values()) {
+                                    if (sub.nodeType == 38) {
+                                        bevyrlyLog += "    Adding function " + sub.toJSON() + ".<br />";
+                                        bevyrlyIndex.addFunctionNode(sub);
                                     }
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             }).then(_ => {
                 bevyrlyIndex.isInitialized = true;

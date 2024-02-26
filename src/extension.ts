@@ -6,7 +6,6 @@ import { registerNotebookDocument } from './notebook_document';
 import { Loc } from 'jinx-rust';
 
 let bevyrlyIndex: BevyrlyIndex = new BevyrlyIndex();
-let bevyrlyLog: string = "";
 
 export function expandLinkFromName(bevyrlyIndex: BevyrlyIndex, system: string): [Loc, string] | undefined {
     let loc = bevyrlyIndex.locs.get(system);
@@ -35,9 +34,9 @@ export function expandSystemFromName(bevyrlyIndex: BevyrlyIndex, system: string,
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('bevyrly.start', () => {
-        startBevyrlyIndexing(context, bevyrlyIndex, bevyrlyLog);
+        startBevyrlyIndexing(context, bevyrlyIndex);
     }));
 
     registerTextDocument(context, bevyrlyIndex);
-    registerNotebookDocument(context, bevyrlyIndex, bevyrlyLog);
+    registerNotebookDocument(context, bevyrlyIndex);
 }

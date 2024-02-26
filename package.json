@@ -4,7 +4,7 @@
   "icon": "icon.png",
   "publisher": "DEVLIKE",
   "description": "A bevy-oriented coding context editor for easier system search. Pronounced as beverly.",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "repository": {
     "url": "https://github.com/devlike-code/bevyrly"
   },
@@ -18,8 +18,15 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "virtualWorkspaces": {
-      "supported": true
+    "configuration": {
+      "title": "Bevyrly",
+      "properties": {
+        "bevyrly.sourceFolder": {
+          "type": "string",
+          "default": "src",
+          "description": "The source folder Bevyrly is going to catalogue (`src` by default)"
+        }
+      }
     },
     "commands": [
       {

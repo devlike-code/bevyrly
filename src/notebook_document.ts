@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { BevyrlyIndex, startBevyrlyIndexing } from '.';
+import { BevyrlyIndex, bevyrlyLog, startBevyrlyIndexing } from '.';
 import { expandLinkFromName, expandSystemFromName } from './extension';
 
 interface BevyrlyNotebook {
@@ -21,10 +21,10 @@ class BevyrlyController implements vscode.Disposable {
     private readonly _controller: vscode.NotebookController;
     private _executionOrder = 0;
 
-    constructor(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex, bevyrlyLog: string) {
+    constructor(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex) {
         this._bevyrlyIndex = bevyrlyIndex;
         if (!this._bevyrlyIndex.isInitialized) {
-            startBevyrlyIndexing(context, bevyrlyIndex, bevyrlyLog);
+            startBevyrlyIndexing(context, bevyrlyIndex);
         }
 
         this._controller = vscode.notebooks.createNotebookController(
@@ -58,7 +58,8 @@ class BevyrlyController implements vscode.Disposable {
         let query = cell.document.getText();
 
         if (query == "~") {
-            let output = "<code>" + Array.from(this._bevyrlyIndex.any.keys()).length + "</code> resources registered.";
+            let output = "<code>" + Array.from(this._bevyrlyIndex.any.keys()).length + "</code> resources registered.<br /><hr />" + bevyrlyLog;
+
             let result = new vscode.NotebookCellOutput([vscode.NotebookCellOutputItem.text(output, "text/html")]);
             execution.replaceOutput(result, cell);
             execution.end(true, Date.now());
@@ -181,11 +182,11 @@ class BevyrlyNotebookSerializer implements vscode.NotebookSerializer {
     }
 }
 
-export function registerNotebookDocument(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex, bevyrlyLog: string) {
+export function registerNotebookDocument(context: vscode.ExtensionContext, bevyrlyIndex: BevyrlyIndex) {
     context.subscriptions.push(
         vscode.workspace.registerNotebookSerializer('bevyrly-notebook', new BevyrlyNotebookSerializer())
     );
-    context.subscriptions.push(new BevyrlyController(context, bevyrlyIndex, bevyrlyLog));
+    context.subscriptions.push(new BevyrlyController(context, bevyrlyIndex));
 
     let disposableNewQuery = vscode.commands.registerCommand('bevyrly.newNotebook', async () => {
         var setting: vscode.Uri = vscode.Uri.parse("untitled:untitled.bevyrly");

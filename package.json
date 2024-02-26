@@ -3,10 +3,14 @@
   "displayName": "bevyrly",
   "description": "It's pronounced beverly. A bevy-oriented coding context editor",
   "version": "0.0.1",
+  "repository": {
+    "url": "https://github.com/devlike-code/bevyrly"
+  },
   "engines": {
     "vscode": "^1.86.0"
   },
   "categories": [
+    "Notebooks",
     "Other"
   ],
   "activationEvents": [],

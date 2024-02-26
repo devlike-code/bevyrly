@@ -391,6 +391,7 @@ export function startBevyrlyIndexing(context: vscode.ExtensionContext, bevyrlyIn
                 }
             }).then(_ => {
                 bevyrlyIndex.isInitialized = true;
+                console.log(bevyrlyIndex);
             });
         }
     }

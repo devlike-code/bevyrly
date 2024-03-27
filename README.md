@@ -15,8 +15,8 @@ To start using Bevyrly (just like Beverly), install this extension, and then ope
 - `*Transform`: find all systems that include `Query<&mut Transform>` within it
 - `#Config`: find all systems that include `Res<Config>` within it
 - `$Config`: find all systems that include `ResMut<Config>` or `NonSendMut<Config>` within it
-- `<ShipFireEvent`: find all systems that include `EventReader<ShipFireEvent>` within it
-- `>ShipFireEvent`: find all systems that include `EventWriter<ShipFireEvent>` within it
+- `?ShipFireEvent`: find all systems that include `EventReader<ShipFireEvent>` within it
+- `!ShipFireEvent`: find all systems that include `EventWriter<ShipFireEvent>` within it
 - `+Tag`: find all systems that include `With<Tag>` within it
 - `-Tag`: find all systems that include `Without<Tag>` within it
 - `JustText`: will match any of the above (might yield a *lot* of content)
@@ -27,7 +27,7 @@ To start using Bevyrly (just like Beverly), install this extension, and then ope
 - `:my prompt goes here`: find and print declaration for all systems that mention 'my', 'prompt', 'goes', and 'here'
 
 ### Examples
-- `:&Transform >ShipFireEvent +Player`: prints full function declarations for any system that queries the `Transform` component immutably, accesses `EventWriter<ShipFireEvent>`, and has a `With<Player>`.
+- `:&Transform !ShipFireEvent +Player`: prints full function declarations for any system that queries the `Transform` component immutably, accesses `EventWriter<ShipFireEvent>`, and has a `With<Player>`.
 - `+Player -Player`: prints linkable locations to all the systems that require `With<Player>` and `Without<Player>` (possibly in different arguments)
 - `Foo Bar`: prints locations of all the systems that have the strings `Foo` and `Bar` <i>anywhere</i> in their arguments (including resources, components, etc.)
 

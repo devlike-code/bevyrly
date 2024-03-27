@@ -116,11 +116,11 @@ export class BevyrlyIndex {
     }
 
     addEventReader(system: string, c: string) {
-        this.addQueryStorage(system, c, "event_write");
+        this.addQueryStorage(system, c, "event_read");
     }
 
     addEventWriter(system: string, c: string) {
-        this.addQueryStorage(system, c, "event_read");
+        this.addQueryStorage(system, c, "event_write");
     }
 
     addRes(system: string, c: string) {
@@ -180,8 +180,8 @@ export class BevyrlyIndex {
             switch (part.at(0)) {
                 case '&': map = this.query; break;
                 case '*': map = this.mut_query; break;
-                case '>': map = this.event_write; break;
-                case '<': map = this.event_read; break;
+                case '!': map = this.event_write; break;
+                case '?': map = this.event_read; break;
                 case '#': map = this.res; break;
                 case '$': map = this.mut_res; break;
                 case '+': map = this.with; break;
